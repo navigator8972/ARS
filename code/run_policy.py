@@ -19,8 +19,9 @@ def main():
     args = parser.parse_args()
 
     print('loading and building expert policy')
-    lin_policy = np.load(args.expert_policy_file)
-    lin_policy = lin_policy.items()[0][1]
+    lin_policy = np.load(args.expert_policy_file, allow_pickle=True)
+
+    lin_policy = list(lin_policy.items())[0][1]
     
     M = lin_policy[0]
     # mean and std of state vectors estimated online by ARS. 
@@ -32,6 +33,8 @@ def main():
     returns = []
     observations = []
     actions = []
+
+    timestep_limit = 25000
     for i in range(args.num_rollouts):
         print('iter', i)
         obs = env.reset()
@@ -49,8 +52,10 @@ def main():
             steps += 1
             if args.render:
                 env.render()
-            if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
-            if steps >= env.spec.timestep_limit:
+            if steps % 100 == 0: print("%i/%i"%(steps, timestep_limit))
+            # if steps >= env.spec.timestep_limit:
+            if steps >= timestep_limit:
+            
                 break
         returns.append(totalr)
 
