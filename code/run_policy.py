@@ -8,6 +8,8 @@ Example usage:
 import numpy as np
 import gym
 
+from character_data_utils import collectCharacterPointBlob
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
@@ -57,6 +59,9 @@ def main():
             if steps >= timestep_limit:
             
                 break
+
+            collectCharacterPointBlob(env)
+            
         returns.append(totalr)
 
     print('returns', returns)
