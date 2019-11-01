@@ -9,6 +9,7 @@ import numpy as np
 import gym
 
 from character_data_utils import collectCharacterPointBlob
+import datetime
 
 def main():
     import argparse
@@ -36,13 +37,18 @@ def main():
     observations = []
     actions = []
 
-    timestep_limit = 25000
+    timestep_limit = 200
+
+    point_clouds = []
+
     for i in range(args.num_rollouts):
         print('iter', i)
         obs = env.reset()
         done = False
         totalr = 0.
         steps = 0
+
+        rollout_point_clouds = []
         while not done:
             action = np.dot(M, (obs - mean)/std)
             observations.append(obs)
@@ -60,9 +66,17 @@ def main():
             
                 break
 
-            collectCharacterPointBlob(env)
-            
+            point_frame = collectCharacterPointBlob(env)
+            if point_frame is not None:
+                rollout_point_clouds.append(point_frame)
+
         returns.append(totalr)
+        print('Collected {0} frames'.format(len(rollout_point_clouds)))
+        if rollout_point_clouds:
+            point_clouds.append(np.array(rollout_point_clouds))
+            print(np.array(rollout_point_clouds).shape)
+
+    np.savez_compressed(args.envname+'-{date:%Y-%m-%d_%H:%M:%S}'.format(date=datetime.datetime.now()), data=point_clouds)
 
     print('returns', returns)
     print('mean return', np.mean(returns))
